@@ -4,10 +4,10 @@ module Interpreter
   ) where
 
 import Command     ( Command(..) )
-import Eval        ( runEval, eval )
-import Environment ( Environment(..), new, assign )
+import Eval        ( eval, runEval )
+import Environment ( Environment(..), assign, history, new, rollback )
 import Expression  ( Expression(..), Value(..) )
-import Program     ( Program(..), Instruction(..), PC )
+import Program     ( Instruction(..), PC, Program(..) )
 
 import Control.Monad.Except
 import Control.Monad.Reader
@@ -52,6 +52,20 @@ execute Next program = do
   storeExecuted instruction
   modify $ \s -> s { pc = pc s + offset }
 
+execute (Inspect name) program = do
+  value <- fmap (history name) (gets env)
+  case value of
+    Nothing -> liftIO $ print ("Undefined variable: " ++ name)
+    Just value -> liftIO $ print (name ++" = " ++ show value)
+
+execute Back program = do
+  executedInstructions <- gets executed
+  case executedInstructions of
+    [] -> liftIO $ print "Nothing has been executed"
+    (x:xs) -> do
+      offset <- undoInstruction x
+      modify $ \s -> s { executed = xs, pc = pc s + offset }
+
 executeInstruction :: Instruction -> Interpreter Int
 executeInstruction (Assign name exp) = do
   value <- evaluate exp
@@ -70,6 +84,20 @@ executeInstruction (GoToFalse exp offset) = do
   if value
      then return 1
      else return offset
+
+undoInstruction :: Instruction -> Interpreter Int
+undoInstruction (Assign name _) =  do
+  modify $ \s -> s { env = Environment.rollback name (env s) }
+  return (-1)
+
+undoInstruction (GoTo offset) = do
+  return (-offset)
+
+undoInstruction ins@(GoToFalse _ _) = do
+  offset <- executeInstruction ins
+  return (-offset)
+
+undoInstruction _ = return (-1)
 
 evaluate :: Expression -> Interpreter Value
 evaluate exp = do
