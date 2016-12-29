@@ -20,10 +20,11 @@ executable kronos
   build-depends:       base,
                        containers,
                        mtl
-  other-modules:       Interpreter,
+  other-modules:       Command
                        Environment,
                        Eval,
                        Expression,
+                       Interpreter,
                        Program,
                        Statement
   default-language:    Haskell2010

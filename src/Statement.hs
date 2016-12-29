@@ -16,13 +16,11 @@ data Statement
 
 testStatement :: Statement
 testStatement
-  = While (Var "x" `Eq` Const (B True))
-    ( Seq
-        ( Print (Const (I 4)) )
-        ( While (Var "y" `Eq` Const (B False))
-          ( Seq
-              ( Print (Const (I 10)) )
-              ( Print (Const (I 11)) )
-          )
+  = Seq
+      (Assign "x" (Const (I 0)))
+      (While (Var "x" `Lt` Const (I 10))
+        ( Seq
+            ( Print  (Var "x") )
+            ( Assign "x" (Add (Var "x") (Const (I 1))) )
         )
-    )
+      )

@@ -2,6 +2,7 @@ module Environment
   ( Environment(..)
   , lookupVar
   , new
+  , assign
   ) where
 
 import Expression ( Value(..) )
@@ -14,3 +15,6 @@ new = Map.empty
 
 lookupVar :: String -> Environment -> Maybe Value
 lookupVar = Map.lookup
+
+assign :: String -> Value -> Environment -> Environment
+assign = Map.insert

@@ -9,6 +9,8 @@ import Environment ( Environment(..), lookupVar )
 import Expression  ( Expression(..), Value(..) )
 
 type Eval a = ReaderT Environment (Either String) a
+
+runEval :: Environment -> Eval a -> Either String a
 runEval env ex = runReaderT ex env
 
 evali op e0 e1 = do e0' <- eval e0
