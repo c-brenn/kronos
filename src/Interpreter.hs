@@ -7,7 +7,7 @@ import Command     ( Command(..) )
 import Eval        ( eval, runEval )
 import Environment ( Environment(..), assign, history, new, rollback )
 import Expression  ( Expression(..), Value(..) )
-import Program     ( Instruction(..), PC, Program(..) )
+import Program     ( Instruction(..), isControlFlow, PC, Program(..) )
 
 import Control.Monad.Except
 import Control.Monad.Reader
@@ -46,11 +46,14 @@ run program = do
 
 execute :: Command -> Program -> Interpreter ()
 execute Next program = do
-  instruction <- fmap (program !!) (gets pc)
-  liftIO $ print ("Executing: " ++ show instruction)
-  offset <- executeInstruction instruction
-  storeExecuted instruction
+  ins <- fmap (program !!) (gets pc)
+  unless (isControlFlow ins) $ liftIO $ print ("Executing: " ++ show ins)
+
+  offset <- executeInstruction ins
+  storeExecuted ins
   modify $ \s -> s { pc = pc s + offset }
+
+  when (isControlFlow ins) (execute Next program)
 
 execute (Inspect name) program = do
   value <- fmap (history name) (gets env)
@@ -63,8 +66,11 @@ execute Back program = do
   case executedInstructions of
     [] -> liftIO $ print "Nothing has been executed"
     (x:xs) -> do
+      unless (isControlFlow x) $ liftIO $ print ("Undoing: " ++ show x)
       offset <- undoInstruction x
       modify $ \s -> s { executed = xs, pc = pc s + offset }
+      when (isControlFlow x) $ execute Back program
+
 
 executeInstruction :: Instruction -> Interpreter Int
 executeInstruction (Assign name exp) = do

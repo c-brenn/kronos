@@ -15,6 +15,11 @@ data Instruction
 
 type Program = [Instruction]
 
+isControlFlow :: Instruction -> Bool
+isControlFlow (GoTo _) = True
+isControlFlow (GoToFalse _ _) = True
+isControlFlow _ = False
+
 fromAST :: Statement -> Program
 fromAST (Statement.Seq s1 s2) = fromAST s1 ++ fromAST s2
 fromAST (Statement.If ex s1 s2) =
