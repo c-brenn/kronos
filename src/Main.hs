@@ -1,12 +1,16 @@
 module Main where
 
 import Program     ( fromAST )
-import Statement   ( testStatement )
+import Statement   ( Statement(..) )
 import Interpreter ( run, runInterpreter )
+
+import System.Environment ( getArgs )
 
 main :: IO ()
 main = do
-  let program = fromAST testStatement
+  [filename] <- getArgs
+  statement <- fmap (read::String->Statement) (readFile filename)
+  let program = fromAST statement
   result <- runInterpreter $ run program
   case result of
     Left exception ->

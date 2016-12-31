@@ -47,7 +47,7 @@ run program = do
 execute :: Command -> Program -> Interpreter ()
 execute Next program = do
   ins <- fmap (program !!) (gets pc)
-  unless (isControlFlow ins) $ liftIO $ print ("Executing: " ++ show ins)
+  unless (isControlFlow ins) $ liftIO $ putStrLn ("Executing: " ++ show ins)
 
   offset <- executeInstruction ins
   storeExecuted ins
@@ -66,7 +66,7 @@ execute Back program = do
   case executedInstructions of
     [] -> liftIO $ print "Nothing has been executed"
     (x:xs) -> do
-      unless (isControlFlow x) $ liftIO $ print ("Undoing: " ++ show x)
+      unless (isControlFlow x) $ liftIO $ putStrLn ("Undoing: " ++ show x)
       offset <- undoInstruction x
       modify $ \s -> s { executed = xs, pc = pc s + offset }
       when (isControlFlow x) $ execute Back program

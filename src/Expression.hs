@@ -6,7 +6,7 @@ module Expression
 data Value
   = I Int
   | B Bool
-  deriving (Eq, Show)
+  deriving (Eq, Show, Read)
 
 data Expression
   = Const Value
@@ -21,4 +21,4 @@ data Expression
   | Gt Expression Expression
   | Lt Expression Expression
   | Var String
-  deriving (Eq, Show)
+  deriving (Eq, Show, Read)
