@@ -26,6 +26,7 @@ executable kronos
                        Expression,
                        Interpreter,
                        Program,
+                       StaticAnalysis,
                        Statement
   default-language:    Haskell2010
 
